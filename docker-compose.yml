@@ -1,0 +1,18 @@
+version: '3.8'
+services:
+  mysql:
+    image: mysql:8.0
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: 'handred'
+      MYSQL_ROOT_PASSWORD: 'handred'
+    networks:
+      default:
+        aliases:
+          - db.local
+    ports:
+      - '3306:3306'
+
+volumes:
+  mysql_data:
+    driver: local
