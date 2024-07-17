@@ -16,7 +16,7 @@ type application struct {
 
 func main() {
 	addr := flag.String("addr", ":4000", "HTTP network address")
-	dsn := flag.String("dsn", "root:handred@tcp(mysql:3306)/handred", "MySQL data source")
+	dsn := flag.String("dsn", "root:handred@tcp(127.0.0.1:3306)/handred", "MySQL data source")
 	flag.Parse()
 
 	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
@@ -32,6 +32,7 @@ func main() {
 		logger: logger,
 	}
 
+	logger.Info("Application running")
 	err = http.ListenAndServe(*addr, app.routes())
 }
 
