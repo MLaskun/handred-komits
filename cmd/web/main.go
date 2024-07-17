@@ -3,6 +3,7 @@ package main
 import (
 	"database/sql"
 	"flag"
+	"html/template"
 	"log/slog"
 	"net/http"
 	"os"
@@ -11,7 +12,8 @@ import (
 )
 
 type application struct {
-	logger *slog.Logger
+	logger        *slog.Logger
+	templateCache map[string]*template.Template
 }
 
 func main() {
@@ -28,12 +30,21 @@ func main() {
 	}
 	defer db.Close()
 
-	app := &application{
-		logger: logger,
+	templateCache, err := newTemplateCache()
+	if err != nil {
+		logger.Error(err.Error())
+		os.Exit(1)
 	}
 
-	logger.Info("Application running")
+	app := &application{
+		logger:        logger,
+		templateCache: templateCache,
+	}
+
+	logger.Info("Application running", "addr", *addr)
 	err = http.ListenAndServe(*addr, app.routes())
+	logger.Error(err.Error())
+	os.Exit(1)
 }
 
 func openDB(dsn string) (*sql.DB, error) {
