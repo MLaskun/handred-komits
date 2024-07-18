@@ -8,12 +8,14 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/MLaskun/handred-komits/internal/models"
 	_ "github.com/go-sql-driver/mysql"
 )
 
 type application struct {
 	logger        *slog.Logger
 	templateCache map[string]*template.Template
+	user          *models.UserModel
 }
 
 func main() {
@@ -39,6 +41,7 @@ func main() {
 	app := &application{
 		logger:        logger,
 		templateCache: templateCache,
+		user:          &models.UserModel{DB: db},
 	}
 
 	logger.Info("Application running", "addr", *addr)

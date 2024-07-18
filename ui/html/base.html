@@ -1,18 +1,22 @@
 {{define "base"}}
 <!doctype html>
 <html lang='en'>
-	<head>
-		<meta charset='utf8'>
-		<title>Handred</title>
-		<link rel='stylesheet' href='/static/css/main.css'>
-	</html>
-	<body>
-		<header>
-			<h1><a href='/'>Home</a></h1>
-		</header>
-		<main>
-			{{template "main" .}}
-		</main>
-	<body/>
-<html/>
-{{end}}
+
+<head>
+	<meta charset='utf8'>
+	<title>{{template "title" .}} - Handred</title>
+	<link rel='stylesheet' href='/static/css/main.css'>
+</head>
+
+<body>
+	<header>
+		<h1><a href='/'>Home</a></h1>
+	</header>
+	{{template "nav" .}}
+	<main>
+		{{template "main" .}}
+	</main>
+
+	<body />
+	<html />
+	{{end}}
