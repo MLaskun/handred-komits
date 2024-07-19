@@ -38,3 +38,30 @@ func (app *application) userSignupPost(w http.ResponseWriter, r *http.Request) {
 	app.logger.Info("User created ", "username", username)
 	http.Redirect(w, r, fmt.Sprint("/"), http.StatusSeeOther)
 }
+
+func (app *application) userLogin(w http.ResponseWriter, r *http.Request) {
+	data := app.newTemplateData(r)
+
+	app.render(w, r, http.StatusOK, "login.html", data)
+}
+
+func (app *application) userLoginPost(w http.ResponseWriter, r *http.Request) {
+	err := r.ParseForm()
+	if err != nil {
+		app.clientError(w, http.StatusBadRequest)
+		return
+	}
+
+	username := r.PostForm.Get("username")
+	password := r.PostForm.Get("password")
+
+	_, err = app.user.Authenticate(username, password)
+	if err != nil {
+		app.logger.Info("No such user registered yet")
+		http.Redirect(w, r, fmt.Sprint("/"), http.StatusSeeOther)
+		return
+	}
+
+	app.logger.Info("User will log in when it will be handled", "username", username)
+	http.Redirect(w, r, fmt.Sprint("/"), http.StatusSeeOther)
+}
