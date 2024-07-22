@@ -16,6 +16,7 @@ type application struct {
 	logger        *slog.Logger
 	templateCache map[string]*template.Template
 	user          *models.UserModel
+	db            *sql.DB
 }
 
 func main() {
@@ -42,6 +43,7 @@ func main() {
 		logger:        logger,
 		templateCache: templateCache,
 		user:          &models.UserModel{DB: db},
+		db:            db,
 	}
 
 	logger.Info("Application running", "addr", *addr)
