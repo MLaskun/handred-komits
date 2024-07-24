@@ -9,6 +9,7 @@ import (
 	"os"
 
 	"github.com/MLaskun/handred-komits/internal/models"
+	"github.com/go-playground/form/v4"
 	_ "github.com/go-sql-driver/mysql"
 )
 
@@ -17,6 +18,7 @@ type application struct {
 	templateCache map[string]*template.Template
 	user          *models.UserModel
 	db            *sql.DB
+	formDecoder   *form.Decoder
 }
 
 func main() {
@@ -39,11 +41,14 @@ func main() {
 		os.Exit(1)
 	}
 
+	formDecoder := form.NewDecoder()
+
 	app := &application{
 		logger:        logger,
 		templateCache: templateCache,
 		user:          &models.UserModel{DB: db},
 		db:            db,
+		formDecoder:   formDecoder,
 	}
 
 	logger.Info("Application running", "addr", *addr)

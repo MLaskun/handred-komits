@@ -4,7 +4,16 @@ import (
 	"database/sql"
 	"fmt"
 	"net/http"
+
+	"github.com/MLaskun/handred-komits/internal/validator"
 )
+
+type userSignupForm struct {
+	Username            string `form:"username"`
+	Password            string `form:"password"`
+	Email               string `form:"email"`
+	validator.Validator `form:"-"`
+}
 
 func (app *application) home(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("Server", "Go")
@@ -20,24 +29,7 @@ func (app *application) userSignup(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *application) userSignupPost(w http.ResponseWriter, r *http.Request) {
-	err := r.ParseForm()
-	if err != nil {
-		app.clientError(w, http.StatusBadRequest)
-		return
-	}
 
-	username := r.PostForm.Get("username")
-	password := r.PostForm.Get("password")
-	email := r.PostForm.Get("email")
-
-	_, err = app.user.Insert(username, password, email)
-	if err != nil {
-		app.serverError(w, r, err)
-		return
-	}
-
-	app.logger.Info("User created ", "username", username)
-	http.Redirect(w, r, fmt.Sprint("/"), http.StatusSeeOther)
 }
 
 func (app *application) userLogin(w http.ResponseWriter, r *http.Request) {
@@ -68,6 +60,9 @@ func (app *application) userLoginPost(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, fmt.Sprint("/"), http.StatusSeeOther)
 }
 
+func (app *application) userLogoutPost(w http.ResponseWriter, r *http.Request) {
+
+}
 func (app *application) purgeDatabase(w http.ResponseWriter, r *http.Request) {
 	err := purgeDatabase(app.db)
 	if err != nil {
@@ -89,7 +84,7 @@ func (app *application) purgeDatabase(w http.ResponseWriter, r *http.Request) {
 }
 
 func purgeDatabase(db *sql.DB) error {
-	_, err := db.Exec(`DROP TABLE IF EXISTS users;`)
+	_, err := db.Exec(`DROP TABLE IF EXISTS users, sessions;`)
 	return err
 }
 func createTables(db *sql.DB) error {
@@ -107,7 +102,25 @@ func createTables(db *sql.DB) error {
 	}
 
 	_, err = db.Exec(`
+		CREATE TABLE sessions (
+			token CHAR(43) PRIMARY KEY,
+			data BLOB NOT NULL,
+			expiry TIMESTAMP(6) NOT NULL
+		);
+	`)
+	if err != nil {
+		return err
+	}
+
+	_, err = db.Exec(`
 		ALTER TABLE users ADD CONSTRAINT users_uc_email UNIQUE (email);
+	`)
+	if err != nil {
+		return err
+	}
+
+	_, err = db.Exec(`
+		CREATE INDEX session_expiry_idx ON sessions (expiry);
 	`)
 	return err
 }
