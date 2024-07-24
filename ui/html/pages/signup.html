@@ -1,0 +1,17 @@
+{{define "title"}}Sign new user{{end}}
+
+{{define "main"}}
+<form action='/user/signup' method='POST'>
+	<div>
+		<label>Username:</label>
+		<input type='text' name='username'>
+		<label>Password:</label>
+		<input type='password' name='password'>
+		<label>Email:</label>
+		<input type='email' name='email'>
+	</div>
+	<div>
+		<input type='submit' value='Register now'>
+	</div>
+</form>
+{{end}}

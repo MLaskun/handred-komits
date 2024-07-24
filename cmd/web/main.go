@@ -3,15 +3,22 @@ package main
 import (
 	"database/sql"
 	"flag"
+	"html/template"
 	"log/slog"
 	"net/http"
 	"os"
 
+	"github.com/MLaskun/handred-komits/internal/models"
+	"github.com/go-playground/form/v4"
 	_ "github.com/go-sql-driver/mysql"
 )
 
 type application struct {
-	logger *slog.Logger
+	logger        *slog.Logger
+	templateCache map[string]*template.Template
+	user          *models.UserModel
+	db            *sql.DB
+	formDecoder   *form.Decoder
 }
 
 func main() {
@@ -28,12 +35,26 @@ func main() {
 	}
 	defer db.Close()
 
-	app := &application{
-		logger: logger,
+	templateCache, err := newTemplateCache()
+	if err != nil {
+		logger.Error(err.Error())
+		os.Exit(1)
 	}
 
-	logger.Info("Application running")
+	formDecoder := form.NewDecoder()
+
+	app := &application{
+		logger:        logger,
+		templateCache: templateCache,
+		user:          &models.UserModel{DB: db},
+		db:            db,
+		formDecoder:   formDecoder,
+	}
+
+	logger.Info("Application running", "addr", *addr)
 	err = http.ListenAndServe(*addr, app.routes())
+	logger.Error(err.Error())
+	os.Exit(1)
 }
 
 func openDB(dsn string) (*sql.DB, error) {
